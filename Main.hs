@@ -10,6 +10,7 @@ import System.Environment
 import Data.List
 import qualified Data.Text as T
 import qualified Data.Vector as V
+import Control.Monad
 import Data.Aeson
 import Data.Aeson.Lens
 import Control.Lens
@@ -29,13 +30,12 @@ getKmdLmt = (^? key "_kmd" . key "lmt" . _String)
 
 getHashTags :: Note -> Maybe [Text]
 getHashTags note = 
-    let maybeVector = note ^? key "entities" . key "hashtags" . _Array -- Maybe (Vector Value)
+    let maybeVector = note ^? key "entities" . key "hashtags" . _Array 
         maybeList =  fmap V.toList maybeVector
         valToText (String text) = Just text
         valToText _ = Nothing
         textList = resolve . (fmap valToText)
     in fmap textList maybeList
-        -- TODO this^ is a  rn, make it a Maybe [Text]
 
 resolve :: [Maybe a] -> [a]
 resolve maybes = resolve' [] maybes
@@ -86,24 +86,29 @@ safeHead list =
 getTagDate :: Note -> Maybe Text
 getTagDate = (>>= safeHead) . (fmap (filter isTagDate)) . getHashTags
 
+compareMaybes :: (Ord b) => (a -> Maybe b) -> a -> a -> Ordering
+compareMaybes getter item1 item2 = 
+    let prop1 = getter item1
+        prop2 = getter item2
+    in case (prop1, prop2) of 
+        (Just thing1, Just thing2) -> compare thing1 thing2
+        (Just thing, Nothing) -> GT
+        _ -> EQ
+
 equalYears :: Note -> Note -> Bool
-equalYears note1 note2 =
-    let year1 = getYear note1
-        year2 = getYear note2
-    in case (year1, year2) of 
-        (Just y1, Just y2) -> y1 == y2
-        _ -> False
+equalYears note1 note2 = EQ == (compareMaybes getYear note1 note2)
 
 compareYears :: Note -> Note -> Ordering
-compareYears note1 note2 = 
-    let year1 = getYear note1
-        year2 = getYear note2
-    in case (year1, year2) of 
-        (Just y1, Just y2) -> compare y1 y2
-        (Just y, Nothing) -> GT
-        _ -> LT 
+compareYears = compareMaybes getYear
 
-main ::IO ()
+compareTagDates :: Note -> Note -> Ordering
+compareTagDates = compareMaybes getTagDate
+
+--displayYear :: [Note] -> IO ()
+--displayYear notes =
+--    sequence_ $ fmap displayNote (sortBy (\x y ->  ))
+
+main :: IO ()
 main = do
     args <- getArgs
     (Just notes) <- (readNotes "notes.json")
@@ -115,7 +120,7 @@ main = do
         ("view": _) -> do
             let journal = filter (containsTag "#journal") notes
                 grouped = groupBy equalYears journal
-                byYear = sortBy (\x y -> compareYears (head x) (head y)) grouped
-            print $ fmap (fmap getTagDate) byYear
+                byYear = sortBy (\x y -> compareYears (head x) (head y)) $ grouped
+            print $  fmap (resolve . (fmap getTagDate)) byYear
         _ ->  print "yo"
 
