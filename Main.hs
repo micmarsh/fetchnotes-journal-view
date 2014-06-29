@@ -29,12 +29,12 @@ getKmdLmt = (^? key "_kmd" . key "lmt" . _String)
 
 getHashTags :: Note -> Maybe [Text]
 getHashTags note = 
-    let vector = note ^? key "entities" . key "hashtags" . _Array -- Maybe (Vector Value)
-        list =  fmap V.toList vector
+    let maybeVector = note ^? key "entities" . key "hashtags" . _Array -- Maybe (Vector Value)
+        maybeList =  fmap V.toList maybeVector
         valToText (String text) = Just text
         valToText _ = Nothing
         textList = resolve . (fmap valToText)
-    in fmap textList list
+    in fmap textList maybeList
         -- TODO this^ is a  rn, make it a Maybe [Text]
 
 resolve :: [Maybe a] -> [a]
@@ -63,18 +63,28 @@ getYear = (fmap (T.take 4)) . getTimestamp
 months :: [Text]
 months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
 
+month = (T.take 3) . (T.tail)
+
 isTagDate :: Text -> Bool
-isTagDate = (`elem` months) . (T.take 3) . (T.tail)
+isTagDate = (`elem` months) . month
+
+enumTagDate :: Text -> Text
+enumTagDate tagDate =
+    let m = month tagDate
+        day = T.drop 4 tagDate
+        hundreds = case elemIndex m months of
+            Nothing -> 0
+            Just index -> index + 1
+    in T.concat [(T.pack . show) hundreds, day]
+
+safeHead :: [a] -> Maybe a
+safeHead list =
+    if length list > 0
+    then Just (head list)
+    else Nothing
 
 getTagDate :: Note -> Maybe Text
-getTagDate note = 
-    let hashtags = getHashTags note
-        -- TODO replace this filterer with something that selects only datetags
-        justdate = fmap (filter isTagDate) hashtags
-    in justdate >>= \list -> 
-            if length list > 0
-            then Just (head list)
-            else Nothing
+getTagDate = (>>= safeHead) . (fmap (filter isTagDate)) . getHashTags
 
 equalYears :: Note -> Note -> Bool
 equalYears note1 note2 =
