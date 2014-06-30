@@ -1,7 +1,7 @@
 # Fetchnotes Journal Viewer
 
 ## Background 
-Back in the day, I used to journal in Fetchnotes and tagged notes by `"#<month><day>"`, such as `"#may23", "#jul4", or "#dec18". 
+Back in the day, I used to journal in Fetchnotes and tagged notes by `"#<month><day>"`, such as `"#may23"`, `"#jul4"`, or `"#dec18"`. 
 
 Given an exported set of notes (mine), I can use this script to read them in chronological order
 
