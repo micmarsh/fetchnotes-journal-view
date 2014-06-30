@@ -24,8 +24,11 @@ readNotes file = fmap decode $ BL.readFile file
 checkSameness :: String -> (Note -> Maybe Text) -> [Note] -> IO ()
 checkSameness string function notes = do
     let things = (group . (fmap (T.take 10)) . resolve) $ fmap function notes
+        multiples = filter (> 1) $ fmap length things
+        max' = foldl' max 0 
     putStrLn ("Sets of the same " ++ string)
-    print $ filter (> 1) $ fmap length things
+    print multiples
+    putStrLn $ "The most with the same: " ++ (show (max' multiples)) ++ "\n"
 
 
 displayYear :: [Note] -> IO ()
@@ -33,9 +36,9 @@ displayYear notes =
     let sorted = sortBy compareTagDates notes
     in sequence_ $ fmap displayNote sorted
     where 
-    parseMaybe (Just text) = text
-    parseMaybe Nothing = ""
-    displayNote = putStrLn . T.unpack . (`T.append` "\n") . parseMaybe . getText
+        parseMaybe (Just text) = text
+        parseMaybe Nothing = ""
+        displayNote = putStrLn . T.unpack . (`T.append` "\n") . parseMaybe . getText
 
 main :: IO ()
 main = do
