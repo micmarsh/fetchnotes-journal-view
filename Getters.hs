@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Getters where
-import Journal.Internal
 import Data.Text.Internal
 import qualified Data.Vector as V
 import qualified Data.Text as T
@@ -8,7 +7,7 @@ import Data.Aeson
 import Data.Aeson.Lens
 import Control.Lens
 import Utils (resolve)
-
+import Type
 
 getYear :: Note -> Maybe Text
 getYear = (fmap (T.take 4)) . getTimestamp

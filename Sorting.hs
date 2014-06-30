@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Sorting where
-import Journal.Internal
 import Data.Text.Internal
 
 import Data.List
@@ -8,6 +7,8 @@ import Getters
 import Utils
 import Data.Aeson
 import qualified Data.Text as T
+import Type
+
 
 
 months :: [Text]

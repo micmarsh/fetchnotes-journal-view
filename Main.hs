@@ -1,7 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 -- string stuff
-import Journal.Internal
 import Data.ByteString.Lazy.Internal
 import Data.Text.Internal
 -- real stuff
@@ -11,6 +10,8 @@ import qualified Data.Text as T
 import Control.Monad
 import Data.Aeson
 import Data.List
+import Type
+
 
 import Sorting
 import Getters
