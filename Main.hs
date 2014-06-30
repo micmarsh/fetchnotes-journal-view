@@ -102,11 +102,21 @@ compareYears :: Note -> Note -> Ordering
 compareYears = compareMaybes getYear
 
 compareTagDates :: Note -> Note -> Ordering
-compareTagDates = compareMaybes getTagDate
+compareTagDates = compareMaybes ((fmap enumTagDate) . getTagDate)
 
---displayYear :: [Note] -> IO ()
---displayYear notes =
---    sequence_ $ fmap displayNote (sortBy (\x y ->  ))
+displayYear :: [Note] -> IO ()
+displayYear notes =
+    let sorted = sortBy compareTagDates notes
+    in sequence_ $ fmap displayNote sorted
+    where 
+    parseMaybe (Just text) = text
+    parseMaybe Nothing = ""
+    displayNote = putStrLn . T.unpack . (`T.append` "\n") . parseMaybe . (^? key "text" . _String)
+        --let text = note ^? key "text" . _String
+        --    kmd = note ^? key "_kmd" . key "lmt" . _String
+        --    time = note ^? key "timestamp" . _String
+        --    display = foldl T.append "" $ fmap (`T.append` "\n") $ resolve [text, kmd, time]
+        --in putStrLn $ T.unpack display
 
 main :: IO ()
 main = do
@@ -121,6 +131,6 @@ main = do
             let journal = filter (containsTag "#journal") notes
                 grouped = groupBy equalYears journal
                 byYear = sortBy (\x y -> compareYears (head x) (head y)) $ grouped
-            print $  fmap (resolve . (fmap getTagDate)) byYear
+            sequence_ $ fmap displayYear byYear
         _ ->  print "yo"
 
