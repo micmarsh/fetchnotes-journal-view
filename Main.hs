@@ -7,9 +7,10 @@ import Data.Text.Internal
 -- real stuff
 import qualified Data.ByteString.Lazy as BL
 import System.Environment
-g 'import qualified Data.Text as T
+import qualified Data.Text as T
 import Control.Monad
 import Data.Aeson
+import Data.List
 
 import Sorting
 import Getters
@@ -22,7 +23,7 @@ readNotes file = fmap decode $ BL.readFile file
 
 checkSameness :: String -> (Note -> Maybe Text) -> [Note] -> IO ()
 checkSameness string function notes = do
-    let things = (group . resolve) $ fmap function notes
+    let things = (group . (fmap (T.take 10)) . resolve) $ fmap function notes
     putStrLn ("Sets of the same " ++ string)
     print $ filter (> 1) $ fmap length things
 
