@@ -19,6 +19,9 @@ getTimestamp = (^? key "timestamp" . _String)
 getKmdLmt :: Note -> Maybe Text
 getKmdLmt = (^? key "_kmd" . key "lmt" . _String)
 
+getText :: Note -> Maybe Text
+getText = (^? key "text" . _String)
+
 getHashTags :: Note -> Maybe [Text]
 getHashTags note = 
     let maybeVector = note ^? key "entities" . key "hashtags" . _Array 

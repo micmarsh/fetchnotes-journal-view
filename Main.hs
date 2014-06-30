@@ -6,15 +6,10 @@ import Data.ByteString.Lazy.Internal
 import Data.Text.Internal
 -- real stuff
 import qualified Data.ByteString.Lazy as BL
-import qualified Data.HashMap.Strict as H
 import System.Environment
-import Data.List
-import qualified Data.Text as T
-import qualified Data.Vector as V
+g 'import qualified Data.Text as T
 import Control.Monad
 import Data.Aeson
-import Data.Aeson.Lens
-import Control.Lens
 
 import Sorting
 import Getters
@@ -39,7 +34,7 @@ displayYear notes =
     where 
     parseMaybe (Just text) = text
     parseMaybe Nothing = ""
-    displayNote = putStrLn . T.unpack . (`T.append` "\n") . parseMaybe . (^? key "text" . _String)
+    displayNote = putStrLn . T.unpack . (`T.append` "\n") . parseMaybe . getText
 
 main :: IO ()
 main = do
